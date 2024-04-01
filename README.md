@@ -10,10 +10,7 @@
 [![MIT license](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=for-the-badge)](https://github.com/luolongfei/freenom/blob/main/LICENSE)
 
 Documentation: [English version](https://github.com/luolongfei/freenom/blob/main/README_EN.md) | 中文版
-</div>
-
-## 🎤 大新闻：
-### Freenom 已经加上了 AWS WAF CAPTCHA 用于各个页面的验证，目前无法通过脚本自动续期，如果是 reCAPTCHA 或者 hCaptcha 倒是好解决，AWS WAF CAPTCHA 比较小众，暂时无解。所以，各位可以先手动续期（手动续期失败的，可以尝试隐身模式 + 全局），静观其变，等待后续有 AWS WAF CAPTCHA solver 了再说，一手消息可以通过下方入群，持续关注。江湖路远，后会有期。
+</div> 
 
 [📢 公告](#-公告)
 
@@ -27,6 +24,8 @@ Documentation: [English version](https://github.com/luolongfei/freenom/blob/main
 
 [📪 配置送信功能](#-配置送信功能)（支持 邮件送信 / Telegram Bot / 企业微信 / Server 酱 / Bark 等送信方式）
 
+[⛵ 通过 Docker Compose 方式部署](#-通过-docker-compose-部署)
+
 [🐳 通过 Docker 方式部署](#-通过-docker-部署)（推荐，最简单的部署方式之一）
 
 [🧊 通过 Heroku 部署](#-通过-Heroku-部署)
@@ -37,7 +36,7 @@ Documentation: [English version](https://github.com/luolongfei/freenom/blob/main
 
 [🧪 通过 Mogenius 部署](#-通过-Mogenius-部署)（已不可行）
 
-[☁ 通过 各种云函数 部署](#-通过各种云函数部署)
+[☁ 通过 各种云函数 部署](#-通过各种云函数部署) （目前各平台已开启收费模式，已放弃支持）
 
 [🚧 直接拉取源码部署](#-直接拉取源码部署)
 
@@ -52,8 +51,6 @@ Documentation: [English version](https://github.com/luolongfei/freenom/blob/main
 [💖 所有贡献者](#-所有贡献者)
 
 [📝 TODO List](#-TODO-List)
-
-[📰 更新日志](#-更新日志)（每次新版本发布，可以参考此日志决定是否更新）
 
 [🍅 本项目的其它语言实现](#-本项目的其它语言实现)
 
@@ -223,6 +220,125 @@ Thanks for non-commercial open source development authorization by JetBrains.
 
 ***
 
+### ⛵ 通过 Docker Compose 部署
+
+**注意，目前是 beta 版本，只支持在 amd64 架构的机器上安装，arm 或其它架构的用户请稍安勿躁，等后续更新。或者如果你需要一台服务器，可以考虑** [美国便宜 VPS](https://go.llfapp.com/cc)
+
+#### 1、一键安装 docker 和 docker compose
+
+Debian / Ubuntu（推荐）
+
+```shell
+apt-get update -y;
+apt-get install -y wget vim git make;
+wget -qO- get.docker.com | bash;
+systemctl start docker;
+sudo systemctl enable docker.service;
+sudo systemctl enable containerd.service;
+docker version;
+DOCKER_COMPOSE_VER=2.24.3;
+DOCKER_CONFIG=/usr/local/lib/docker;
+mkdir -p $DOCKER_CONFIG/cli-plugins;
+curl -SL https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_VER}/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose;
+sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose;
+docker compose version;
+```
+
+CentOS
+
+```shell
+yum update -y;
+yum install -y wget vim make;
+wget -qO- get.docker.com | bash;
+systemctl start docker;
+sudo systemctl enable docker.service;
+sudo systemctl enable containerd.service;
+docker version;
+DOCKER_COMPOSE_VER=2.24.3;
+DOCKER_CONFIG=/usr/local/lib/docker;
+mkdir -p $DOCKER_CONFIG/cli-plugins;
+curl -SL https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_VER}/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose;
+sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose;
+docker compose version;
+```
+
+#### 2、下载本项目
+
+```shell
+git clone https://github.com/luolongfei/freenom.git && cd freenom
+```
+
+#### 3、配置
+
+##### 3.1、申请 wit.ai 的 token
+
+3.1.1 访问 https://wit.ai
+
+3.1.2 使用 Facebook 账户登录或者使用邮箱注册账户登录，只需要邮箱就可以注册
+
+3.1.3 前往 https://wit.ai/apps 画面，创建一个新的 app
+
+3.1.4 语言选择 English，名字随意，类型选择私有，创建之
+
+3.1.5 前往 Management > Settings (https://wit.ai/apps/<App ID>/settings) 画面
+
+3.1.6 复制 Client Access Token，下面需要写入 .env 文件中，WIT_AI_KEY='你复制的 Client Access Token'
+
+##### 3.2、修改 .env 配置文件
+
+将 .env 配置文件中的内容修改为你自己的配置，如果是从旧版升级，也可以直接把旧版 .env 复制到新版项目根目录，脚本会自动更新它。配置含义参考 .env.example 文件中的注解。
+
+```shell
+cp .env.example .env;
+vim .env;
+```
+
+修改完成后，输入 `:wq` 保存并退出。
+
+#### 4、启动
+
+注意：以下命令均需要在 docker-compose.yml 所在目录执行才有效。
+
+```shell
+make up
+```
+
+没错，就是这么简单。然后可以执行 `make logs` 查看实时日志。
+
+##### 4.1、常用命令
+
+启动或者更新到最新版
+
+```shell
+make up
+```
+
+停止
+
+```shell
+make down
+```
+
+查看实时日志
+
+```shell
+make logs
+```
+
+清理容器占用的空间
+
+```shell
+make clear
+```
+
+重启容器
+
+```shell
+make restart
+```
+
+*通过 docker compose 部署部分结束。*
+
 ### 🐳 通过 Docker 部署
 
 *如果你有自己的服务器，这是最推荐的部署方式。*
@@ -240,13 +356,13 @@ Docker 仓库地址为： [https://hub.docker.com/r/luolongfei/freenom](https://
 Debian / Ubuntu
 
 ```shell
-apt-get update && apt-get install -y wget vim
+apt-get update && apt-get install -y wget vim make
 ```
 
 CentOS
 
 ```shell
-yum update && yum install -y wget vim
+yum update && yum install -y wget vim make
 ```
 
 执行此命令等候自动安装 Docker
@@ -336,9 +452,10 @@ docker run -d --name freenom --restart always -v $(pwd):/conf -v $(pwd)/logs:/ap
 | TELEGRAM_BOT_TOKEN | 你的`Telegram bot`的`token` |  -  |  否   ||
 | TELEGRAM_BOT_ENABLE | 是否启用`Telegram Bot`推送功能 | `0` |  否   |    `1`：启用<br>`0`：不启用<br>默认不启用，如果设为`1`，则必须设置上面的`TELEGRAM_CHAT_ID`和`TELEGRAM_BOT_TOKEN`变量     |
 | NOTICE_FREQ | 通知频率 | `1` |  否   |                                 `0`：仅当有续期操作的时候<br>`1`：每次执行                                  |
-| NEZHA_SERVER | 哪吒探针服务端的 IP 或域名 |  -  |  否   |
-| NEZHA_PORT | 哪吒探针服务端的端口 |  -  |  否   |  
-| NEZHA_KEY | 哪吒探针客户端专用 Key |  -  |  否   |  
+| NEZHA_SERVER | 哪吒探针服务端的 IP 或域名 |  -  |  否   ||
+| NEZHA_PORT | 哪吒探针服务端的端口 |  -  |  否   ||
+| NEZHA_KEY | 哪吒探针客户端专用 Key |  -  |  否   ||
+| NEZHA_TLS | 哪吒客户SSL/TLS加密 |  -  |  否   |  `1`：启用<br>`0`：不启用  |
 
 **更多配置项含义，请参考 [.env.example](https://github.com/luolongfei/freenom/blob/main/.env.example) 文件中的注释。**
 
@@ -442,7 +559,7 @@ systemctl restart docker
 
 **在看完上行文档的具体内容，并且你确定你行后**，便可点击下方按钮，尝试一键部署：
 
-[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=docker&name=freenom&ports=80;http;/&env[FF_TOKEN]=20190214&env[SHOW_SERVER_INFO]=1&env[MOSAIC_SENSITIVE_INFO]=1&env[FREENOM_USERNAME]=&env[FREENOM_PASSWORD]=&env[MULTIPLE_ACCOUNTS]=&env[TELEGRAM_CHAT_ID]=&env[TELEGRAM_BOT_TOKEN]=&env[TELEGRAM_BOT_ENABLE]=0&env[TOKEN_OR_URL]=[OPTION]%20Token%20or%20URL&env[NEZHA_SERVER]=[OPTION]%20Nezha%20server&env[NEZHA_PORT]=[OPTION]%20Nezha%20port&env[NEZHA_KEY]=[OPTION]%20Nezha%20key&image=docker.io/luolongfei/freenom:koyeb)
+[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=docker&name=freenom&ports=80;http;/&env[FF_TOKEN]=20190214&env[SHOW_SERVER_INFO]=1&env[MOSAIC_SENSITIVE_INFO]=1&env[FREENOM_USERNAME]=&env[FREENOM_PASSWORD]=&env[MULTIPLE_ACCOUNTS]=&env[MAX_REQUEST_RETRY_COUNT]=200&env[TELEGRAM_CHAT_ID]=&env[TELEGRAM_BOT_TOKEN]=&env[TELEGRAM_BOT_ENABLE]=0&env[NEZHA_SERVER]=[OPTION]%20Nezha%20server&env[NEZHA_PORT]=[OPTION]%20Nezha%20port&env[NEZHA_KEY]=[OPTION]%20Nezha%20key&env[NEZHA_TLS]=[OPTION]%20Enable%20tls&image=docker.io/luolongfei/freenom:koyeb)
 
 ***
 
@@ -531,20 +648,6 @@ PayPal: [https://www.paypal.me/mybsdc](https://www.paypal.me/mybsdc)
 - 支持交互式安装，免去手动修改配置的繁琐操作
 - 支持自动升级
 - 多个账户的续期结果通知合并为同一条消息
-
-### 📰 更新日志
-
-此处只含最新版本的更新日志，完整的日志记录请参考 [CHANGELOG.md](https://github.com/luolongfei/freenom/blob/main/CHANGELOG.md)
-
-#### [Unreleased](#)
-
-- 解决 企业微信 因送信内容过长被截断问题
-
-#### [v0.5.1](https://github.com/luolongfei/freenom/releases/tag/v0.5.1) - 2022-08-29
-
-- 支持一键部署至 Koyeb、Heroku 等平台，虽然 Heroku 马上要收费了，但 Koyeb 依然免费
-- 优化在各种环境下的目录读写权限判断
-- 支持给日志或者命令行输出内容中的敏感信息打马赛克，默认不启用
 
 ### 🍅 本项目的其它语言实现
 
